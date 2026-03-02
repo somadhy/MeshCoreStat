@@ -1,0 +1,100 @@
+name: CI & Release
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cargo build
+        run: cargo build --release
+
+      - name: Cargo test
+        run: cargo test --release
+
+  release:
+    name: Build & publish release artifacts
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Verify tag matches Cargo.toml version
+        shell: bash
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          TOML_VERSION=$(grep '^version\s*=' Cargo.toml | head -1 | sed 's/[^"]*"\([^"]*\)".*/\1/')
+          echo "Tag version:     $TAG_VERSION"
+          echo "Cargo.toml ver.: $TOML_VERSION"
+          if [ "$TAG_VERSION" != "$TOML_VERSION" ]; then
+            echo "Tag version does not match Cargo.toml version."
+            exit 1
+          fi
+
+      - name: Package binary
+        id: package
+        shell: bash
+        run: |
+          set -e
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          BIN_NAME="meshcorestat"
+
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            BIN_PATH="target/release/${BIN_NAME}.exe"
+            ARCHIVE_NAME="${BIN_NAME}-${TAG_VERSION}-x86_64-pc-windows-msvc.tar.gz"
+          else
+            BIN_PATH="target/release/${BIN_NAME}"
+            ARCHIVE_NAME="${BIN_NAME}-${TAG_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          fi
+
+          if [ ! -f "$BIN_PATH" ]; then
+            echo "Binary not found at $BIN_PATH"
+            exit 1
+          fi
+
+          tar czf "$ARCHIVE_NAME" "$BIN_PATH"
+          echo "archive_name=$ARCHIVE_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package.outputs.archive_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
