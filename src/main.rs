@@ -1,7 +1,7 @@
-mod cli;
-mod serial;
-mod model;
 mod app;
+mod cli;
+mod model;
+mod serial;
 mod ui;
 
 use anyhow::Result;

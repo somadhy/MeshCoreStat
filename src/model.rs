@@ -97,9 +97,18 @@ mod tests {
 
     #[test]
     fn test_metric_from_str() {
-        assert!(matches!(MetricKind::from_str("battery_mv"), Some(MetricKind::BatteryMv)));
-        assert!(matches!(MetricKind::from_str("last_rssi"), Some(MetricKind::LastRssi)));
-        assert!(matches!(MetricKind::from_str("recv"), Some(MetricKind::RecvPackets)));
+        assert!(matches!(
+            MetricKind::from_str("battery_mv"),
+            Some(MetricKind::BatteryMv)
+        ));
+        assert!(matches!(
+            MetricKind::from_str("last_rssi"),
+            Some(MetricKind::LastRssi)
+        ));
+        assert!(matches!(
+            MetricKind::from_str("recv"),
+            Some(MetricKind::RecvPackets)
+        ));
         assert!(MetricKind::from_str("unknown").is_none());
     }
 
@@ -137,4 +146,3 @@ mod tests {
         assert_eq!(stats.recv_errors, 776);
     }
 }
-

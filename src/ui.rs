@@ -64,9 +64,9 @@ fn run_tui_inner(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, args: Ar
                 .margin(1)
                 .constraints(
                     [
-                        Constraint::Length(7),  // header (title + Node with 4 строками)
-                        Constraint::Length(8),  // core + radio
-                        Constraint::Min(5),     // packets + relative stats
+                        Constraint::Length(7), // header (title + Node with 4 строками)
+                        Constraint::Length(8), // core + radio
+                        Constraint::Min(5),    // packets + relative stats
                     ]
                     .as_ref(),
                 )
@@ -91,9 +91,9 @@ fn run_tui_inner(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, args: Ar
                 .margin(1)
                 .constraints(
                     [
-                        Constraint::Length(7),  // header (title + Node с 4 строками)
-                        Constraint::Length(8),  // core + radio
-                        Constraint::Min(5),     // packets + relative stats
+                        Constraint::Length(7), // header (title + Node с 4 строками)
+                        Constraint::Length(8), // core + radio
+                        Constraint::Min(5),    // packets + relative stats
                     ]
                     .as_ref(),
                 )
@@ -132,7 +132,7 @@ fn draw_header(
     area: ratatui::layout::Rect,
     state: &crate::app::AppState,
     args: &Args,
-){
+) {
     // Верхняя строка — название инструмента, по центру.
     let rows = Layout::default()
         .direction(Direction::Vertical)
@@ -168,11 +168,7 @@ fn draw_header(
     f.render_widget(paragraph, rows[1]);
 }
 
-fn draw_core_and_radio(
-    f: &mut Frame,
-    area: ratatui::layout::Rect,
-    state: &crate::app::AppState,
-){
+fn draw_core_and_radio(f: &mut Frame, area: ratatui::layout::Rect, state: &crate::app::AppState) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
@@ -226,7 +222,7 @@ fn draw_packets_and_charts(
     f: &mut Frame,
     area: ratatui::layout::Rect,
     state: &crate::app::AppState,
-){
+) {
     // Ограничим высоту блоков, чтобы рамки не тянулись до самого низа.
     let rows = Layout::default()
         .direction(Direction::Vertical)
@@ -248,7 +244,9 @@ fn draw_packets_and_charts(
         Line::from(format!("Direct RX   : {}", state.packets.direct_rx)),
         Line::from(format!("Recv errors : {}", state.packets.recv_errors)),
     ];
-    let packets_block = Block::default().borders(Borders::ALL).title("Packets (total)");
+    let packets_block = Block::default()
+        .borders(Borders::ALL)
+        .title("Packets (total)");
     let packets_paragraph = Paragraph::new(packets_lines).block(packets_block);
     f.render_widget(packets_paragraph, chunks[0]);
 
@@ -286,9 +284,9 @@ fn draw_packets_and_charts(
             to_per_hour(state.packets.recv_errors)
         )),
     ];
-    let relative_block =
-        Block::default().borders(Borders::ALL).title("Relative (per hour)");
+    let relative_block = Block::default()
+        .borders(Borders::ALL)
+        .title("Relative (per hour)");
     let relative_paragraph = Paragraph::new(relative_lines).block(relative_block);
     f.render_widget(relative_paragraph, chunks[1]);
 }
-

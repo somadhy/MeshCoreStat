@@ -105,10 +105,7 @@ pub fn normalize_line(s: &str) -> String {
         .lines()
         .find(|l| l.trim().contains("->"))
         .unwrap_or_else(|| s.lines().next().unwrap_or(""));
-    line.trim()
-        .trim_start_matches("->")
-        .trim()
-        .to_string()
+    line.trim().trim_start_matches("->").trim().to_string()
 }
 
 #[cfg(test)]
@@ -117,7 +114,10 @@ mod tests {
 
     #[test]
     fn test_normalize_line_basic() {
-        assert_eq!(normalize_line(" -> v1.13.0-295f67d (Build: 15-Feb-2026)\r\n"), "v1.13.0-295f67d (Build: 15-Feb-2026)");
+        assert_eq!(
+            normalize_line(" -> v1.13.0-295f67d (Build: 15-Feb-2026)\r\n"),
+            "v1.13.0-295f67d (Build: 15-Feb-2026)"
+        );
         assert_eq!(normalize_line("  -> Heltec V4 OLED\n"), "Heltec V4 OLED");
         assert_eq!(normalize_line("-> something"), "something");
     }
@@ -131,4 +131,3 @@ mod tests {
         );
     }
 }
-

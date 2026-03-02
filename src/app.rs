@@ -39,9 +39,16 @@ pub fn build_initial_state(args: &Args) -> Result<AppState> {
     let version = send_command_text(&mut *port, "ver")?;
     let board = send_command_text(&mut *port, "board")?;
     let name_raw = send_command_text(&mut *port, "get name")?;
-    let name = normalize_line(&name_raw).trim_start_matches('>').trim().to_string();
+    let name = normalize_line(&name_raw)
+        .trim_start_matches('>')
+        .trim()
+        .to_string();
 
-    let node = NodeInfo { version, board, name };
+    let node = NodeInfo {
+        version,
+        board,
+        name,
+    };
 
     // First stats snapshot
     let core = fetch_core_stats(&mut *port)?;
@@ -59,10 +66,7 @@ fn init_metric_series(state: &mut AppState, metric_names: &[String]) {
 
     // If no metrics were specified explicitly, choose a sensible default set.
     if metric_names.is_empty() {
-        let defaults = [
-            MetricKind::RecvPackets,
-            MetricKind::SentPackets,
-        ];
+        let defaults = [MetricKind::RecvPackets, MetricKind::SentPackets];
         for kind in defaults {
             state
                 .metrics
@@ -82,7 +86,12 @@ fn init_metric_series(state: &mut AppState, metric_names: &[String]) {
     }
 }
 
-pub fn tick_update(state: &mut AppState, port_name: &str, baud: u32, interval_secs: u64) -> Result<()> {
+pub fn tick_update(
+    state: &mut AppState,
+    port_name: &str,
+    baud: u32,
+    interval_secs: u64,
+) -> Result<()> {
     let mut port = open_port(port_name, baud)?;
 
     state.core = fetch_core_stats(&mut *port)?;
@@ -121,24 +130,24 @@ fn rate_per_sec(current: u64, previous: u64, dt: f64) -> f64 {
 pub fn fetch_core_stats(port: &mut dyn serialport::SerialPort) -> Result<CoreStats> {
     let raw = send_command_raw(port, "stats-core")?;
     let line = normalize_line(&raw);
-    let stats: CoreStats =
-        serde_json::from_str(&line).with_context(|| format!("failed to parse stats-core JSON: {line}"))?;
+    let stats: CoreStats = serde_json::from_str(&line)
+        .with_context(|| format!("failed to parse stats-core JSON: {line}"))?;
     Ok(stats)
 }
 
 pub fn fetch_radio_stats(port: &mut dyn serialport::SerialPort) -> Result<RadioStats> {
     let raw = send_command_raw(port, "stats-radio")?;
     let line = normalize_line(&raw);
-    let stats: RadioStats =
-        serde_json::from_str(&line).with_context(|| format!("failed to parse stats-radio JSON: {line}"))?;
+    let stats: RadioStats = serde_json::from_str(&line)
+        .with_context(|| format!("failed to parse stats-radio JSON: {line}"))?;
     Ok(stats)
 }
 
 pub fn fetch_packet_stats(port: &mut dyn serialport::SerialPort) -> Result<PacketStats> {
     let raw = send_command_raw(port, "stats-packets")?;
     let line = normalize_line(&raw);
-    let stats: PacketStats =
-        serde_json::from_str(&line).with_context(|| format!("failed to parse stats-packets JSON: {line}"))?;
+    let stats: PacketStats = serde_json::from_str(&line)
+        .with_context(|| format!("failed to parse stats-packets JSON: {line}"))?;
     Ok(stats)
 }
 
@@ -180,5 +189,3 @@ mod tests {
         assert_eq!(rate_per_sec(5, 10, 5.0), 0.0);
     }
 }
-
-
