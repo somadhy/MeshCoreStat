@@ -235,6 +235,13 @@ fn draw_packets_and_charts(
         .split(rows[0]);
 
     // Absolute packet counters (left side).
+    let recv_total = state.packets.recv + state.packets.recv_errors;
+    let recv_errors_pct = if recv_total > 0 {
+        (state.packets.recv_errors as f64) * 100.0 / (recv_total as f64)
+    } else {
+        0.0
+    };
+
     let packets_lines = vec![
         Line::from(format!("Recv        : {}", state.packets.recv)),
         Line::from(format!("Sent        : {}", state.packets.sent)),
@@ -242,7 +249,10 @@ fn draw_packets_and_charts(
         Line::from(format!("Direct TX   : {}", state.packets.direct_tx)),
         Line::from(format!("Flood RX    : {}", state.packets.flood_rx)),
         Line::from(format!("Direct RX   : {}", state.packets.direct_rx)),
-        Line::from(format!("Recv errors : {}", state.packets.recv_errors)),
+        Line::from(format!(
+            "Recv errors : {} ({:.1}%)",
+            state.packets.recv_errors, recv_errors_pct
+        )),
     ];
     let packets_block = Block::default()
         .borders(Borders::ALL)

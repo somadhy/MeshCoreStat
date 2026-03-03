@@ -39,7 +39,7 @@ The main dashboard consists of the following blocks:
   Noise floor, last RSSI/SNR, total TX/RX air time and their share of node uptime in percent.
 
 - **Packets (total)**  
-  Cumulative packet counters (`recv`, `sent`, `flood_*`, `direct_*`, `recv_errors`).
+  Cumulative packet counters (`recv`, `sent`, `flood_*`, `direct_*`, `recv_errors`); for `recv_errors` the UI also shows its share of total receptions (`recv + recv_errors`) in percent.
 
 - **Relative (per hour)**  
   The same counters converted to “packets per hour” based on the current uptime.
