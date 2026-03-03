@@ -71,20 +71,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libudev-dev
 
-      - name: Build release binary
-        run: cargo build --release
-
-      - name: Verify tag matches Cargo.toml version
+      - name: Set version in Cargo.toml from tag
         shell: bash
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
-          TOML_VERSION=$(grep '^version\s*=' Cargo.toml | head -1 | sed 's/[^"]*"\([^"]*\)".*/\1/')
-          echo "Tag version:     $TAG_VERSION"
-          echo "Cargo.toml ver.: $TOML_VERSION"
-          if [ "$TAG_VERSION" != "$TOML_VERSION" ]; then
-            echo "Tag version does not match Cargo.toml version."
-            exit 1
-          fi
+          echo "Setting Cargo.toml version to $TAG_VERSION"
+          sed -i.bak "s/^version = .*/version = \"$TAG_VERSION\"/" Cargo.toml && rm -f Cargo.toml.bak
+          grep '^version' Cargo.toml
+
+      - name: Build release binary
+        run: cargo build --release
 
       - name: Package binary
         id: package
